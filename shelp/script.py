@@ -56,6 +56,7 @@ def apptainer(
 
   if command_options: # if optional command arguments
     command_options = dict_to_command(command_options)
+    print(command_options)
     for option in command_options:
       contents += f"  {option} \\\n"
   contents = re.sub("\\\s*$", "", contents.strip())
@@ -65,3 +66,55 @@ def apptainer(
       f.writelines(contents)
   
   return contents
+
+
+def qsiprep(
+  fname, 
+  data_dir, 
+  out_dir,  
+  participant_label,
+  output_resolution, 
+  work_dir = None,
+  unringing_method = None, 
+  fs_license = None,
+  eddy_config = None,
+  use_nvidia = False
+):
+  
+  os.makedirs(op.dirname(fname), exist_ok = True)
+  
+  sbatch_options = {
+    "job_name": participant_label,
+    "output": f"{participant_label}_output.log", 
+    "error": f"{participant_label}_error.log", 
+  }
+
+  apptainer_options = {} # initialize
+  apptainer_options["cleanenv"] = True
+  
+  mount_dirs = [f"{data_dir}:/data", f"{out_dir}:/out"]
+  if work_dir: # if using a working directory
+    mount_dirs.append(f"{work_dir}:/work")
+  apptainer_options["bind"] = mount_dirs
+  apptainer_options["nv"] = use_nvidia 
+
+  command_options = {} # initialize
+  command_options["participant-label"] = participant_label
+  command_options["output-resolution"] = output_resolution
+  if unringing_method: # if using unringing method
+    command_options["unringing-method"] = unringing_method
+  if fs_license: # if fs license provided
+    command_options["fs-license-file"] = "/license.txt"
+  if eddy_config: # if eddy configuration provided
+    command_options["eddy-config"] = "/eddy_config.json"
+  if work_dir: # if using a working directory
+    command_options["work"] = "/work"
+
+  apptainer(
+    fname = fname, 
+    sif_fname = "qsiprep.sif", 
+    sbatch_options = sbatch_options,
+    apptainer_options = apptainer_options,
+    command_arguments = [ "/data", "/out", "participant" ], 
+    command_options = command_options
+  )
