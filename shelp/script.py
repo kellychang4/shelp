@@ -6,8 +6,10 @@ from .utils import dict_to_command, read_json
 from ._constants import CONFIG_JSON
 
 
-def header(fname = None):
+def header(user_config = None):
   config = read_json(CONFIG_JSON)
+  if user_config: # if user supplied config
+    config = {**config, **user_config}
   contents = "#!/usr/bin/env bash\n\n" # initialize
   for key, value in config.items():
     key = re.sub("_", "-", key) # replace underscores with hyphens
@@ -15,11 +17,6 @@ def header(fname = None):
       contents += f"#SBATCH --{key}\n"
     elif value: # if value is not empty
       contents += f"#SBATCH --{key}={value}\n"
-
-  if fname: # write if fname provided
-    with open(fname, "w") as f:
-      f.writelines(contents)
-
   return contents
 
 
@@ -34,16 +31,18 @@ def modules(modules_list = None):
 
 
 def apptainer(
-  fname, 
-  sif_fname, 
+  fname = None, 
+  sif_fname = None,
+  sbatch_options = {}, 
   apptainer_options = {}, 
   command_arguments = [], 
   command_options = {}
 ):
   
-  contents = header() + "\n"
+  contents = header(sbatch_options) + "\n"
   contents += modules("apptainer") + "\n"
-
+  
+  contents += "# Run Apptainer Command\n"
   contents += "apptainer run\\\n"
 
   if apptainer_options: # if optional apptainer arguments
@@ -61,7 +60,8 @@ def apptainer(
       contents += f"  {option} \\\n"
   contents = re.sub("\\\s*$", "", contents.strip())
   
-  with open(fname, "w") as f:
-    f.writelines(contents)
+  if fname: # write if fname provided
+    with open(fname, "w") as f:
+      f.writelines(contents)
   
   return contents
