@@ -1,0 +1,11 @@
+# hidden files (iOS)
+.DS_Store
+
+# compiled files
+__pycache__/
+*.pyc
+
+# meta directories
+*.egg-info
+.ipynb_checkpoints
+.jupyter
