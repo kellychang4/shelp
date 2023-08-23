@@ -1,6 +1,7 @@
 from . import (
   batch, 
   build, 
+  config,
   transfer, 
   utils
 )

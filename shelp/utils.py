@@ -9,8 +9,8 @@ def read_json(fname):
   return contents
 
 
-def write_json(fname, json_dict):
-  contents = json.dumps(json_dict)
+def write_json(fname, json_dict, indent = 2):
+  contents = json.dumps(json_dict, indent = indent)
   with open(fname, "w") as f:
     f.write(contents)  
 
