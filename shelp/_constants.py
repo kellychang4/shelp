@@ -17,7 +17,7 @@ DEFAULT_CONFIG = {
   "no_requeue": False, 
   "nodes": 1, 
   "output": "output.log", 
-  "partition": "", 
+  "partition": "ckpt", 
   "quiet": False, 
   "time": "00-00:15:00",
   "mem": "8G", 

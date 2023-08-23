@@ -3,6 +3,22 @@ import json
 from ._constants import CONFIG_JSON
 
 
+def command_option(key, value):
+  return f"--{key} {value}"
+
+
+def dict_to_command(options):
+  cmd = [] # initialize
+  for key, value in options.items():
+    if value and isinstance(value, bool):
+      cmd.append(f"--{key}") # add boolean flag option
+    elif value and (isinstance(value, list) or isinstance(value, tuple)):
+      cmd.extend([command_option(key, x) for x in value])
+    elif value and (isinstance(value, int) or isinstance(value, str)): 
+      cmd.append(command_option(key, value))
+  return cmd
+
+
 def read_json(fname):
   with open(fname, "r") as f:
     contents = json.load(f)
